@@ -1,0 +1,61 @@
+#In this SQL Project, I'm querying a database with multiple tables in it to analyze statistics about customer and order data. 
+
+--1. How many many unique orders were placed in January? In other words, how many distinct order ids do we have?
+SELECT COUNT(DISTINCT orderID) unique_orders 
+FROM BITDB.JanSales
+WHERE LENGTH(orderID)=6
+AND orderID <> 'Order ID';
+--This query uses the COUNT function and the DISTINCT statement to find the total distinct orders made in January. It also cleans the data by filtering out Order IDs that are missing or inccorect with the WHERE clause.
+
+--2. How many of those orders were for an iPhone?
+SELECT COUNT(DISTINCT orderID) iPhone_orders
+FROM BITDB.JanSales
+WHERE Product = 'iPhone'
+AND LENGTH(orderID) = 6
+AND orderID <> 'Order ID';
+--This query counts the distinct order ids like the last one but further filters the data to only include those with the product type of iPhone.
+
+--3. Select the customer account numbers for all the orders that were placed in February.
+SELECT * FROM BITDB.FebSales;
+SELECT DISTINCT c.acctnum
+FROM BITDB.customers c
+JOIN BITDB.FebSales f
+ON c.order_id = f.orderID
+WHERE LENGTH(f.orderID) = 6
+AND f.orderID <> 'Order ID';
+--To find the account numbers that ordered in February, I used an INNER JOIN to match the account numbers that also ordered in February. I continued to use the WHERE clause to make sure I'm only using clean data.
+
+--4. Which product was the cheapest one sold in January, and what was the price?
+SELECT DISTINCT Product, price
+FROM BITDB.JanSales
+WHERE price IN 
+    (SELECT MIN(price) FROM BITDB.JanSales);
+--First, I created a subquery to find the minimum price in the table. Then, I created a table around it to show the distinct product and it's price.
+
+--5. What is the total revenue for each product sold in January? 
+SELECT Product, ROUND((SUM(quantity) * price), 2) AS revenue
+FROM BITDB.JanSales
+GROUP BY Product
+ORDER BY revenue DESC;
+--I selected the product and calculated it's revenue by adding up the quantity of all of each product sold and mulitplying it by the price. I used the GROUP BY statement to ensure it calculated the revenue for 
+--each product, and I used the ROUND function and ORDER BY statement to improve readability.
+
+--6. Which products were sold in February at 548 Lincoln St, Seattle, WA 98101, how many of each were sold, and what was the total revenue?
+SELECT Product, SUM(Quantity), ROUND((SUM(Quantity)*price), 2) AS revenue
+FROM BITDB.FebSales
+WHERE location = '548 Lincoln St, Seattle, WA 98101'
+GROUP BY Product;
+--This query selects the products this customer ordered, the total of how many of each they ordered, and calculates the total revenue for each.
+
+--7. How many customers ordered more than 2 products at a time in February, and what was the average amount spent for those customers?
+SELECT COUNT(DISTINCT c.acctnum) AS total_customers, ROUND(AVG(f.price*f.quantity),2) AS avg_spent
+FROM BITDB.customers c
+JOIN BITDB.FebSales f
+ON c.order_id = f.orderID
+WHERE f.quantity > 2
+AND LENGTH(f.orderID) = 6
+AND f.orderID <> 'OrderID';
+--This query counts the distinct account numbers for customers who ordered more than two products in February (using WHERE f.quantity > 2) and returns the data along with the average amount these customers spent,
+--rounded for readability. I also used the WHERE clause to filter out incorrect or incomplete account number data. 
+
+
