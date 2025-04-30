@@ -58,4 +58,12 @@ AND f.orderID <> 'OrderID';
 --This query counts the distinct account numbers for customers who ordered more than two products in February (using WHERE f.quantity > 2) and returns the data along with the average amount these customers spent,
 --rounded for readability. I also used the WHERE clause to filter out incorrect or incomplete account number data. 
 
+--8. List all the products sold in Los Angeles in February, and include how many of each were sold.
+SELECT DISTINCT Product, SUM(quantity) AS total_sold
+FROM BITDB.FebSales
+WHERE location LIKE '%Los Angeles%'
+GROUP BY Product
+ORDER BY total_sold DESC;
+--This query selects each product and totals the amount of each sold. I then use the WHERE clause with LIKE to filter down to only the orders placed in Los Angeles.
+
 
