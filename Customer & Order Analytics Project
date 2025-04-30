@@ -66,4 +66,48 @@ GROUP BY Product
 ORDER BY total_sold DESC;
 --This query selects each product and totals the amount of each sold. I then use the WHERE clause with LIKE to filter down to only the orders placed in Los Angeles.
 
+--9. Which locations in New York received at least 3 orders in January, and how many orders did they each receive?
+SELECT DISTINCT location, COUNT(orderID) AS total_orders
+FROM BITDB.JanSales
+WHERE location LIKE '%New York%'
+AND length(orderID) = 6
+AND orderID <> 'Order ID'
+GROUP BY location
+HAVING total_orders >= 3;
+--This query returns each distinct location and a count of each location's total orders. I used the WHERE clause to show only New York locations and filter out missing or incomplete data. I then used the HAVING clause to filter the aggregated data to only show the locations with at least 3 orders.
+
+--10. How many of each type of headphone were sold in February?
+SELECT DISTINCT Product, SUM(Quantity) AS total_sold
+FROM BITDB.FebSales
+WHERE Product LIKE '%Headphone%'
+GROUP BY Product;
+--Here, I gathered each distinct product and the total sold and filtered out any product that did not have "Headphone" in its name.
+
+--11. What was the average amount spent per account in February? (For this question, we want the average amount spent / number of accounts, not the amount spent by each account.)
+SELECT AVG(f.price*f.quantity) avg_spent
+FROM BITDB.FebSales f
+LEFT JOIN BITDB.customers c
+ON f.orderID = c.order_id
+WHERE length(c.order_ID) = 6
+AND c.order_ID <> 'Order ID';
+--I JOINED the FebSales table with the customers table to gather only the data for customers who ordered in February. I then calculated the average amount spent by all the customers.
+
+--12. What was the average quantity of products purchased per account in February? (Just like question 11, we want the overall average, not the average for each account individually).
+SELECT SUM(f.quantity)/COUNT(c.acctnum) avg_num_items
+FROM BITDB.FebSales f
+LEFT JOIN BITDB.customers c
+ON f.orderID = c.order_id
+WHERE length(f.orderID) = 6
+AND f.orderID <> 'Order ID';
+--Like the last question, I joined the two tables together, but this time I calculated the average number of items by dividing the total quantity of items sold by the number of accounts that placed orders in February.
+
+--13. Which product brought in the most revenue in January and how much revenue did it bring in total?
+SELECT DISTINCT Product, SUM(Quantity * price) AS revenue
+FROM BITDB.JanSales
+GROUP BY Product
+ORDER BY revenue DESC
+LIMIT 1;
+--This query shows each product and the total revenue it brought in, but using the ORDER BY and LIMIT clauses allowed me to filter to show only the product that brought in the most revenue.
+
+
 
